@@ -56,7 +56,7 @@ class Connection:
         # checks
         if len(id) < 1:
             Gui().display_message("Enter valid sheet id")
-            raise ValueError
+            return
 
         self.__sheet = Sheet(id)
 

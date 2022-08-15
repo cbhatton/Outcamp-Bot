@@ -7,7 +7,10 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import requests
+from Credentials import credentials
 
+from AppScripts import AppScripts
 
 class Sheet:
 
@@ -16,7 +19,7 @@ class Sheet:
     def __init__(self, spreadsheet_id: str = ''):
 
         self.__creds = None
-        self._service = self.get_service()
+        self._service = credentials().sheets
         self._sheet = self._service.spreadsheets()
         self._spreadsheet_id = spreadsheet_id
 
@@ -63,14 +66,12 @@ class Sheet:
         body = {
             "majorDimension": "ROWS",
             "values": [
-                [
-                    value
-                ]
+                ["name", 'notes', "IN", value]
             ],
-            "range": 'A1'
+            "range": 'A1:D1'
         }
 
-        self._sheet.values().append(spreadsheetId=self._spreadsheet_id, range='A1',
+        self._sheet.values().append(spreadsheetId=self._spreadsheet_id, range='A1:D1',
                                     valueInputOption='USER_ENTERED', body=body).execute()
 
     def get(self, row: str = ''):
@@ -101,20 +102,23 @@ class Sheet:
 
     def find_tag_id(self, id=''):
         result = self._sheet.values().get(spreadsheetId=self._spreadsheet_id,
-                                          range="A1:A40").execute()
+                                          range="A1:D40").execute()
         c = 0
         for i in result['values']:
             c += 1
             print(i, 'FIND TAG')
-            if i[0] == id:
+            if id in i:
                 print(i, c)
                 return c
         else:
             return None
 
+    def select_row(self, id):
+        range = "A" + str(id)
+        AppScripts().setActiveSelection(range, 0)
+
 
 if __name__ == '__main__':
     sheet = Sheet('1UXQ1YRHduKlEbhRDUChRh1D-F2ln75VLQ9c7yE_69BU')
-    item = sheet.get('A1')
 
-    sheet.find_tag_id("abcdefg")
+    sheet.select_row(1)
